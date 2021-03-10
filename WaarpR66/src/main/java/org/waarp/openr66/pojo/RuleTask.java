@@ -20,21 +20,27 @@
 
 package org.waarp.openr66.pojo;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import static org.waarp.openr66.configuration.RuleFileBasedConfiguration.*;
 import static org.waarp.openr66.database.data.DbRule.*;
+
+import java.io.StringWriter;
 
 /**
  * RuleTask data object
  */
 @XmlType(name = XTASK)
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = XTASK)
 public class RuleTask {
-
   @XmlElement(name = TASK_TYPE)
   private String type;
 
@@ -55,11 +61,18 @@ public class RuleTask {
   }
 
   public String getXML() {
-    String res = "<task>";
-    res = res + "<type>" + type + "</type>";
-    res = res + "<path>" + path + "</path>";
-    res = res + "<delay>" + delay + "</delay>";
-    return res + "</task>";
+    try {
+      JAXBContext context = JAXBContext.newInstance(this.getClass());
+      Marshaller m = context.createMarshaller();
+      m.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+
+      StringWriter sw = new StringWriter();
+      m.marshal(this, sw);
+      return sw.toString();
+    } catch (JAXBException e) {
+      // FIX ME: This should launch an exception
+      return "";
+    }
   }
 
   public String getType() {
